@@ -25,6 +25,13 @@ Motor leftMotor(motorLIN1Pin, motorLIN2Pin, motorLENPin);
 const int rightIr = 3;
 const int leftIr = 2;
 
+const byte numChars = 10;
+char receivedChars[numChars];
+
+int leftMotorSpeed = 0;
+int rightMotorSpeed = 0;
+
+boolean newData = false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -38,26 +45,114 @@ void loop() {
 
   int objectLeft = digitalRead(leftIr);
   int objectRight = digitalRead(rightIr);
+  
   if(objectRight == 0 && objectLeft == 0) {
-    Serial.print("Turning around"); 
-    rightMotor.forward(130);
-    leftMotor.backward(130);
+    //Serial.print("Turning around");
+    rightMotorSpeed = 130;
+    leftMotorSpeed = -130; 
+    //rightMotor.forward(130);
+    //leftMotor.backward(130);
   }
   else if(objectLeft == 0){
-    Serial.print("turning away-ob on left "); 
-    leftMotor.forward(130);
-    rightMotor.freeRun();
+    //Serial.print("turning away-ob on left ");
+    rightMotorSpeed = 0;
+    leftMotorSpeed = 130;  
+    //leftMotor.forward(130);
+    //rightMotor.freeRun();
   }
   
   else if(objectRight == 0){
-    Serial.print("turning away-ob on right ");
-    leftMotor.freeRun();
-    rightMotor.forward(130); 
+    //Serial.print("turning away-ob on right ");
+    rightMotorSpeed = 130;
+    leftMotorSpeed = 0;  
+    //leftMotor.freeRun();
+    //rightMotor.forward(130); 
   }
   else{
-    rightMotor.forward(130);
-    leftMotor.forward(130);
-    Serial.print("nothing detected");
+    rightMotorSpeed = 130;
+    leftMotorSpeed = 130;  
+    //Serial.print("nothing detected");
   }
-  Serial.println();
+  
+//  Serial.print("R: ");
+//  Serial.print(rightMotorSpeed, DEC);
+//  Serial.print(",L: ");
+//  Serial.print(leftMotorSpeed, DEC);
+//  
+//  Serial.print(", LD: ");
+//  Serial.print(objectLeft, DEC);
+//  Serial.print(", RD: ");
+//  Serial.print(objectRight, DEC);
+
+  if(rightMotorSpeed > 0){
+    rightMotor.forward(rightMotorSpeed);
+  }
+  if(rightMotorSpeed == 0){
+    rightMotor.freeRun();
+  }
+  if(rightMotorSpeed < 0){
+    rightMotor.backward(rightMotorSpeed);
+  }
+
+  if(leftMotorSpeed > 0){
+    leftMotor.forward(leftMotorSpeed);
+  }
+  if(leftMotorSpeed == 0){
+    leftMotor.freeRun();
+  }
+  if(leftMotorSpeed < 0){
+    leftMotor.backward(leftMotorSpeed);
+  }
+  
+  
+  //Serial.println();
+  recvWithStartEndMarkers();
+  showNewData();
+  
+}
+void recvWithStartEndMarkers() {
+    static boolean recvInProgress = false;
+    static byte ndx = 0;
+    char startMarker = '<';
+    char endMarker = '>';
+    char rc;
+    while (Serial.available() > 0 && newData == false) {
+        rc = Serial.read();
+
+        if (recvInProgress == true) {
+            if (rc != endMarker) {
+                receivedChars[ndx] = rc;
+                ndx++;
+                if (ndx >= numChars) {
+                    ndx = numChars - 1;
+                }
+            }
+            else {
+                receivedChars[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                newData = true;
+            }
+        }
+
+        else if (rc == startMarker) {
+            recvInProgress = true;
+        }
+    }
+}
+
+void showNewData() {
+    if (newData == true) {
+        
+        String left = String(receivedChars[1]);
+        String right = String(receivedChars[3]);
+        //int leftInt = left[0].toInt()*10 + left[1];
+        int valueLeft = String(receivedChars[1]).toInt();
+        int valueRight = String(receivedChars[3]).toInt();
+        Serial.print("Left: ");
+        Serial.print(valueLeft);
+        Serial.print(" Right: ");
+        Serial.println(valueRight);
+        newData = false;
+    }
 }
