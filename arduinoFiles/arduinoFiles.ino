@@ -45,34 +45,40 @@ void loop() {
 
   int objectLeft = digitalRead(leftIr);
   int objectRight = digitalRead(rightIr);
+  Serial.print("\nLD: ");
+  Serial.print(objectLeft);
+  Serial.print(" RD: ");
+  Serial.print(objectRight);
   
-  if(objectRight == 0 && objectLeft == 0) {
-    //Serial.print("Turning around");
-    rightMotorSpeed = 130;
-    leftMotorSpeed = -130; 
-    //rightMotor.forward(130);
-    //leftMotor.backward(130);
-  }
-  else if(objectLeft == 0){
-    //Serial.print("turning away-ob on left ");
-    rightMotorSpeed = 0;
-    leftMotorSpeed = 130;  
-    //leftMotor.forward(130);
-    //rightMotor.freeRun();
-  }
+
   
-  else if(objectRight == 0){
-    //Serial.print("turning away-ob on right ");
-    rightMotorSpeed = 130;
-    leftMotorSpeed = 0;  
-    //leftMotor.freeRun();
-    //rightMotor.forward(130); 
-  }
-  else{
-    rightMotorSpeed = 130;
-    leftMotorSpeed = 130;  
-    //Serial.print("nothing detected");
-  }
+//  if(objectRight == 0 && objectLeft == 0) {
+//    //Serial.print("Turning around");
+//    rightMotorSpeed = 130;
+//    leftMotorSpeed = -130; 
+//    //rightMotor.forward(130);
+//    //leftMotor.backward(130);
+//  }
+//  else if(objectLeft == 0){
+//    //Serial.print("turning away-ob on left ");
+//    rightMotorSpeed = 0;
+//    leftMotorSpeed = 130;  
+//    //leftMotor.forward(130);
+//    //rightMotor.freeRun();
+//  }
+//  
+//  else if(objectRight == 0){
+//    //Serial.print("turning away-ob on right ");
+//    rightMotorSpeed = 130;
+//    leftMotorSpeed = 0;  
+//    //leftMotor.freeRun();
+//    //rightMotor.forward(130); 
+//  }
+//  else{
+//    rightMotorSpeed = 130;
+//    leftMotorSpeed = 130;  
+//    //Serial.print("nothing detected");
+//  }
   
 //  Serial.print("R: ");
 //  Serial.print(rightMotorSpeed, DEC);
@@ -84,25 +90,25 @@ void loop() {
 //  Serial.print(", RD: ");
 //  Serial.print(objectRight, DEC);
 
-  if(rightMotorSpeed > 0){
-    rightMotor.forward(rightMotorSpeed);
-  }
-  if(rightMotorSpeed == 0){
-    rightMotor.freeRun();
-  }
-  if(rightMotorSpeed < 0){
-    rightMotor.backward(rightMotorSpeed);
-  }
-
-  if(leftMotorSpeed > 0){
-    leftMotor.forward(leftMotorSpeed);
-  }
-  if(leftMotorSpeed == 0){
-    leftMotor.freeRun();
-  }
-  if(leftMotorSpeed < 0){
-    leftMotor.backward(leftMotorSpeed);
-  }
+//  if(rightMotorSpeed > 0){
+//    rightMotor.forward(rightMotorSpeed);
+//  }
+//  if(rightMotorSpeed == 0){
+//    rightMotor.freeRun();
+//  }
+//  if(rightMotorSpeed < 0){
+//    rightMotor.backward(rightMotorSpeed);
+//  }
+//
+//  if(leftMotorSpeed > 0){
+//    leftMotor.forward(leftMotorSpeed);
+//  }
+//  if(leftMotorSpeed == 0){
+//    leftMotor.freeRun();
+//  }
+//  if(leftMotorSpeed < 0){
+//    leftMotor.backward(leftMotorSpeed);
+//  }
   
   
   //Serial.println();
@@ -149,10 +155,36 @@ void showNewData() {
         //int leftInt = left[0].toInt()*10 + left[1];
         int valueLeft = String(receivedChars[1]).toInt();
         int valueRight = String(receivedChars[3]).toInt();
-        Serial.print("Left: ");
-        Serial.print(valueLeft);
-        Serial.print(" Right: ");
-        Serial.println(valueRight);
+//        Serial.print("Left: ");
+//        Serial.print(valueLeft*50);
+//        Serial.print(" Right: ");
+//        Serial.println(valueRight*50);
+
+        // apply serial motor values
+        // only use 1-5 for foward
+        if(valueLeft < 5){
+          leftMotor.forward(valueLeft * 50);
+          Serial.print("Left: ");
+          Serial.print(valueLeft*50);
+        }
+        // go backwards if 6-10
+        else if(valueLeft > 5 && valueLeft <10) {
+          leftMotor.backward((valueLeft - 5)*50);
+          Serial.print("Back Left: ");
+          Serial.print((valueLeft-5)*50);
+        }
+
+        if(valueRight < 5){
+          rightMotor.forward(valueRight * 50);
+          Serial.print("Right: ");
+          Serial.print(valueRight*50);
+        }
+        else if(valueRight > 5 && valueRight <10) {
+          rightMotor.backward((valueRight - 5)*50);
+          Serial.print("Back Rigth: ");
+          Serial.print((valueRight-5)*50);
+        }
+
         newData = false;
     }
 }
